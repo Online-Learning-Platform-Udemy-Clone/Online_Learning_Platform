@@ -38,20 +38,20 @@ Future Scope:
 - AI-based course recommendations
 
 6. Technologies Used
-- Frontend:
+A) Frontend:
 * React.js
 * HTML5
 * CSS3
 * JavaScript
 
-- Backend:
+B) Backend:
 * Node.js
 * Express.js
 
-- Database:
+C) Database:
 MongoDB
 
-- Other Tools:
+D) Other Tools:
 * GitHub (Version Control)
 * Cloudinary (for media storage)
 * RESTClient (API testing)
@@ -59,16 +59,16 @@ MongoDB
 7. System Architecture
 The application follows a client-server architecture:
 
-- Frontend (Client):
+A) Frontend (Client):
 * Handles UI/UX
 * Sends requests to backend APIs
 
-- Backend (Server):
+B) Backend (Server):
 * Processes requests
 * Handles authentication
 * Manages database operations
 
-- Database:
+C) Database:
 * Stores user data, course details, and progress
 
 8. Key Features
@@ -114,14 +114,14 @@ The application follows a client-server architecture:
 - User monitoring (optional)
 
 10. Database Design
-- User Collection
+A) User Collection
 * User ID
 * Name
 * Email
 * Password
 * Enrolled Courses
 
-- Course Collection
+B) Course Collection
 * Course ID
 * Title
 * Description
