@@ -1,0 +1,19 @@
+User:
+* Sign Up 
+* Log In
+* Explore Course 
+* Shopping Cart
+- Add to Cart(Add Course)
+- Remove 
+- Save for Later
+- Move to Wish List
+- Proceed to Checkout
+- Promotions (Add Coupon)
+
+- Normal User: 
+* 
+* 
+* 
+
+- Subscribed User:  
+
