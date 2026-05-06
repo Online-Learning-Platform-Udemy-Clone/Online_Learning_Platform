@@ -1,0 +1,33 @@
+#Route for Register(Student and Instructor)
+POST http://localhost:3006/auth/register
+Content-Type: application/json
+
+{
+    "firstName": "student3",
+    "lastName": "rollno47",
+    "email": "student3@gmail.com",
+    "password": "student2",
+    "role": "STUDENT",
+    "profileImageUrl": "#"
+}
+
+###Route for Login(Student, Instructor)
+POST http://localhost:3006/auth/login
+Content-Type: application/json
+
+{
+    "email": "student3@gmail.com",
+    "password": "student3"
+}
+
+###Route for Logout(Student, Instructor and Admin)
+GET http://localhost:3006/auth/logout
+
+###Route for changing Password
+PUT http://localhost:3006/auth/password
+Content-Type: application/json
+
+{
+    "currentPassword":"student2",
+    "newPassword":"student3"
+}
