@@ -6,7 +6,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import {CourseModel} from '../Models/CourseModel.js'
 import {UserModel} from '../Models/UserModel.js'
-import { verifyToken } from '../Middlewares/VerifyToken.js'
+import { verifyToken } from '../Middlewares/verifyToken.js'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 export const instructorApp=exp.Router()

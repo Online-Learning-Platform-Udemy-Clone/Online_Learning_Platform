@@ -1,6 +1,6 @@
 import exp from 'express';
 import { UserModel } from '../Models/UserModel.js';
-import { verifyToken } from '../Middlewares/VerifyToken.js';
+import { verifyToken } from '../Middlewares/verifyToken.js';
 import { EnrollmentModel } from '../Models/EnrollmentModel.js';
 import { CourseModel } from '../Models/CourseModel.js';
 import { PaymentModel } from '../Models/PaymentModel.js';
