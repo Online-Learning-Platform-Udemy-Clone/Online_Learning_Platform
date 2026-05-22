@@ -33,6 +33,16 @@ function createAuthToken(user) {
     }, process.env.SECRET_KEY, { expiresIn: "6h" });
 }
 
+function authCookieOptions() {
+    const isProduction = process.env.NODE_ENV === "production";
+
+    return {
+        httpOnly:true,
+        secure:isProduction,
+        sameSite:isProduction ? "none" : "lax"
+    };
+}
+
 //Route for register
 commonApp.post("/register", async(req,res,next) => {
   try {
@@ -99,11 +109,7 @@ commonApp.post("/login",async(req,res)=>{
         //create jwt(jsonwebtoken)
         const signedToken=createAuthToken(user);
 
-        res.cookie("token",signedToken,{
-            httpOnly:true,
-            secure:false,
-            sameSite:"lax"
-        })
+        res.cookie("token",signedToken,authCookieOptions())
 
         //send res to user
         res.status(200).json({message:"Login Success",payload:sanitizeUser(user)})
@@ -147,11 +153,7 @@ commonApp.put("/forgot-password", async(req,res)=>{
 //Route for Logout
 commonApp.get("/logout",(req,res)=>{
     //delete token from cookie storage
-    res.clearCookie("token",{
-        httpOnly:true,
-        secure:false,
-        sameSite:"lax"
-    })
+    res.clearCookie("token",authCookieOptions())
     //send res
     res.status(200).json({message:"Logout Success"});
 })
@@ -241,11 +243,7 @@ commonApp.put("/profile", verifyToken("STUDENT","INSTRUCTOR","ADMIN"), async(req
         }
 
         const signedToken = createAuthToken(updatedUser);
-        res.cookie("token", signedToken, {
-            httpOnly:true,
-            secure:false,
-            sameSite:"lax"
-        });
+        res.cookie("token", signedToken, authCookieOptions());
 
         res.status(200).json({message:"Profile updated", payload:sanitizeUser(updatedUser)});
     } catch (err) {
