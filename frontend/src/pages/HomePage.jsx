@@ -114,7 +114,7 @@ function CourseCard({ course, onEnroll, isLoggedIn }) {
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
           <div className="flex items-center gap-1 text-amber-500" aria-label="Course rating">
             <span className="text-sm font-bold">4.7</span>
-            <span className="text-xs">★★★★★</span>
+            <span className="text-xs">?????</span>
           </div>
           <button
             type="button"
@@ -202,33 +202,33 @@ export default function HomePage() {
             </div>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
+              <div className="rounded-lg border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
                 <p className="text-3xl font-black text-white">{courses.length}</p>
                 <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200">Courses</p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
+              <div className="rounded-lg border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
                 <p className="text-3xl font-black text-white">{CATEGORIES.length - 1}</p>
                 <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200">Categories</p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
+              <div className="rounded-lg border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
                 <p className="text-3xl font-black text-white">4.7</p>
                 <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200">Avg rating</p>
               </div>
             </div>
           </div>
 
-          <div className="relative min-h-[360px] overflow-hidden rounded-[2rem] shadow-2xl ring-1 ring-white/10 lg:min-h-[430px]">
+          <div className="relative min-h-[360px] overflow-hidden rounded-xl shadow-2xl ring-1 ring-white/10 lg:min-h-[430px]">
             <img
               src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=85"
               alt="Students learning together"
               className="h-full w-full object-cover"
             />
-            <div className="absolute left-4 top-4 rounded-3xl bg-white/90 p-4 text-slate-950 shadow-lg sm:left-8 sm:top-8">
+            <div className="absolute left-4 top-4 rounded-lg bg-white/90 p-4 text-slate-950 shadow-lg sm:left-8 sm:top-8">
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">Popular now</p>
               <p className="mt-1 text-lg font-black">Java Programming</p>
-              <p className="mt-1 text-sm text-slate-600">OOPS • Free course</p>
+              <p className="mt-1 text-sm text-slate-600">OOPS | Free course</p>
             </div>
-            <div className="absolute bottom-4 right-4 rounded-3xl bg-slate-950/90 p-4 text-white shadow-lg sm:bottom-8 sm:right-8">
+            <div className="absolute bottom-4 right-4 rounded-lg bg-slate-950/90 p-4 text-white shadow-lg sm:bottom-8 sm:right-8">
               <p className="text-2xl font-black">50K+</p>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">learning hours</p>
             </div>
@@ -239,7 +239,7 @@ export default function HomePage() {
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto grid max-w-7xl gap-4 px-6 py-8 md:grid-cols-3">
           {FEATURED_TOPICS.map((topic) => (
-            <div key={topic.label} className="group relative h-36 overflow-hidden rounded-[1.5rem] shadow-lg">
+            <div key={topic.label} className="group relative h-36 overflow-hidden rounded-lg shadow-lg">
               <img
                 src={topic.image}
                 alt={topic.label}
@@ -293,7 +293,19 @@ export default function HomePage() {
           })}
         </div>
 
-        {loading && <div className="py-20 text-center text-sm text-slate-500">Loading courses...</div>}
+        {loading && (
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="app-skeleton h-40" />
+                <div className="app-skeleton mt-4 h-4 w-24" />
+                <div className="app-skeleton mt-4 h-5 w-4/5" />
+                <div className="app-skeleton mt-3 h-4 w-full" />
+                <div className="app-skeleton mt-6 h-10 w-full" />
+              </div>
+            ))}
+          </div>
+        )}
 
         {error && (
           <div className="mt-8 rounded border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -339,3 +351,4 @@ export default function HomePage() {
     </div>
   );
 }
+

@@ -80,7 +80,7 @@ commonApp.post("/login",async(req,res)=>{
         const {email,password}=req.body;
 
         //find user by email
-        const user=await UserModel.findOne({email:email});
+        const user=await UserModel.findOne({email:email, isUserActive: true});
 
         //if user not found
         if(!user){

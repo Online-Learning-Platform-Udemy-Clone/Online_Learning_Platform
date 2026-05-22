@@ -136,8 +136,16 @@ export default function BrowseCourses() {
         </div>
 
         {loading && (
-          <div className="flex items-center justify-center py-24">
-            <div className="app-loader" />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="app-card overflow-hidden p-4">
+                <div className="app-skeleton h-32" />
+                <div className="app-skeleton mt-4 h-4 w-24" />
+                <div className="app-skeleton mt-4 h-5 w-4/5" />
+                <div className="app-skeleton mt-3 h-4 w-full" />
+                <div className="app-skeleton mt-6 h-9 w-full" />
+              </div>
+            ))}
           </div>
         )}
 
@@ -146,8 +154,21 @@ export default function BrowseCourses() {
 
         {!loading && !error && filtered.length === 0 && (
           <div className="app-card border-dashed px-6 py-16 text-center">
+            <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-lg bg-blue-50 text-sm font-black text-blue-700">
+              LH
+            </div>
             <p className="text-lg font-semibold text-slate-950">No courses found</p>
             <p className="mt-2 text-sm text-slate-500">Try another search or category.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setCategory("All");
+              }}
+              className="app-button-secondary mt-5 px-4 py-2 text-sm"
+            >
+              Clear filters
+            </button>
           </div>
         )}
 
@@ -176,7 +197,7 @@ function CourseCard({ course, isSaved, isSaving, onClick, onToggleWishlist }) {
     : null;
 
   return (
-    <article className="app-card group flex min-h-64 flex-col overflow-hidden transition-colors hover:border-blue-200">
+    <article className="app-card group flex min-h-64 flex-col overflow-hidden transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg">
       <button type="button" onClick={onClick} className="relative text-left">
         <div className="flex h-32 items-center justify-center overflow-hidden border-b border-slate-200 bg-slate-100">
           {getCourseImage(course) ? (
@@ -194,6 +215,11 @@ function CourseCard({ course, isSaved, isSaving, onClick, onToggleWishlist }) {
           <span className="app-badge">{course.category || "Course"}</span>
           <span className="text-sm font-semibold text-blue-700">{formatPrice(course.price)}</span>
         </div>
+        {course.demoVideo && (
+          <span className="mt-3 inline-flex w-fit rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+            Demo class
+          </span>
+        )}
 
         <button type="button" onClick={onClick} className="mt-3 text-left">
           <h3 className="line-clamp-2 text-base font-semibold leading-6 text-slate-950 group-hover:text-blue-700">
@@ -209,6 +235,14 @@ function CourseCard({ course, isSaved, isSaving, onClick, onToggleWishlist }) {
           <span>{course.chapters?.length ?? 0} chapter{course.chapters?.length === 1 ? "" : "s"}</span>
           <span>{avgRating ? `${avgRating} rating` : "No ratings yet"}</span>
         </div>
+
+        <button
+          type="button"
+          onClick={onClick}
+          className="mt-3 rounded-lg bg-slate-950 px-3 py-2 text-sm font-bold text-white transition hover:bg-blue-700"
+        >
+          View course
+        </button>
 
         <button
           type="button"

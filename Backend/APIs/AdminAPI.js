@@ -68,6 +68,18 @@ adminApp.patch("/users/activate",verifyToken("ADMIN"),async(req,res)=>{
     res.status(200).json({message:"User is Activated",payload:userOfDb})
 })
 
+//Protected Admin Route to Soft Delete a User
+adminApp.delete("/users/:userId", verifyToken("ADMIN"), async (req, res) => {
+    const { userId } = req.params;
+
+    const userOfDb = await UserModel.findByIdAndUpdate(userId, { isUserActive: false }, { new: true });
+
+    if (!userOfDb) {
+        return res.status(404).json({ message: "User not Found" });
+    }
+
+    res.status(200).json({ message: "User account has been soft-deleted", payload: userOfDb });
+});
 
 //Protected Admin Route to get All Courses
 adminApp.get("/courses",verifyToken("ADMIN"),async(req,res)=>{

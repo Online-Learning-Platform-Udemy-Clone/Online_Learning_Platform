@@ -23,25 +23,68 @@ const reviewSchema=new Schema({
     strict:"throw"
 });
 
+const unitSchema=new Schema({
+    title:{
+        type: String,
+        required: [true,"Unit Title is Required"],
+        default: "Untitled Unit"
+    },
+    textContent:{
+        type: String,
+        required: [true,"Unit Content is Required"],
+        minLength: [10,"Unit content should be at least 10 Characters"]
+    },
+    videoContent:{
+        type: String
+    },
+    documentContent:{
+        type: String
+    }
+},
+{
+    versionKey:false,
+    timestamps:true,
+    strict:"throw"
+});
+
+const quizQuestionSchema=new Schema({
+    question:{
+        type: String,
+        required: [true,"Quiz question is required"]
+    },
+    options:{
+        type: [String],
+        validate: {
+            validator: (options)=>Array.isArray(options) && options.filter((option)=>option && option.trim()).length >= 2,
+            message: "Quiz question needs at least two options"
+        },
+        default: []
+    },
+    answerIndex:{
+        type: Number,
+        required: [true,"Correct answer is required"],
+        min: [0,"Answer index cannot be negative"]
+    }
+},
+{
+    versionKey:false,
+    timestamps:true,
+    strict:"throw"
+});
+
 const chapterSchema=new Schema({
     title:{
         type: String,
         required: [true,"Chapter Title is Required"],
         default: "Untitled Chapter"
     },
-    textContent:{
-        type: String,
-        required: [true,"Text Content is Required"],
-        minLength: [30,"Content should be at least 10 Characters"]
+    unitCount:{
+        type: Number,
+        default: 1,
+        min: [0,"Unit count cannot be negative"]
     },
-    videoContent:
-    {
-        type: String
-    },
-    documentContent:
-    {
-        type: String
-    }
+    units: [{type: unitSchema,default:[]}],
+    quiz: [{type: quizQuestionSchema,default:[]}]
 },
 {
     versionKey:false,
@@ -74,6 +117,9 @@ const courseSchema=new Schema({
         required: [true,"Content is Required"]
     },
     thumbnail:{
+        type: String
+    },
+    demoVideo:{
         type: String
     },
     chapters: [{type: chapterSchema,default:[]}],

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { getVideoEmbed } from "../../utils/media";
 
 const CATEGORIES = [
   "Web Development",
@@ -24,10 +25,12 @@ export default function EditCourse() {
     title: "",
     category: "",
     content: "",
+    demoVideo: "",
   });
   const [isCourseActive, setIsCourseActive] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -44,6 +47,7 @@ export default function EditCourse() {
           title: found.title,
           category: found.category,
           content: found.content,
+          demoVideo: found.demoVideo || "",
         });
         setIsCourseActive(found.isCourseActive);
       } catch (err) {
@@ -60,6 +64,31 @@ export default function EditCourse() {
     setForm((prev) => ({ ...prev, [event.target.name]: event.target.value }));
     setError("");
     setSuccess("");
+  };
+
+  const uploadMedia = async (file) => {
+    if (!file) return;
+
+    setUploading(true);
+    setError("");
+    setSuccess("");
+    try {
+      const payload = new FormData();
+      payload.append("file", file);
+
+      const res = await fetch("/instructor-api/media", {
+        method: "POST",
+        credentials: "include",
+        body: payload,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || data.error || "Failed to upload demo video");
+      setForm((prev) => ({ ...prev, demoVideo: data.payload.url }));
+    } catch (err) {
+      setError(err.message || "Failed to upload demo video");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -79,6 +108,7 @@ export default function EditCourse() {
           title: form.title,
           category: form.category,
           content: form.content,
+          demoVideo: form.demoVideo,
         }),
       });
       const data = await res.json();
@@ -124,7 +154,7 @@ export default function EditCourse() {
           to="/instructor/dashboard"
           className="mb-8 inline-block text-sm font-semibold text-slate-500 transition-colors hover:text-slate-950"
         >
-          ← Dashboard
+          Back to dashboard
         </Link>
 
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -184,6 +214,35 @@ export default function EditCourse() {
             />
           </Field>
 
+          <Field label="Demo Video">
+            <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-950">
+              {form.demoVideo ? (
+                <VideoEmbed url={form.demoVideo} />
+              ) : (
+                <div className="flex aspect-video items-center justify-center text-sm font-semibold text-slate-400">
+                  Demo video preview
+                </div>
+              )}
+            </div>
+            <div className="mt-3 space-y-2">
+              <input
+                type="url"
+                name="demoVideo"
+                value={form.demoVideo}
+                onChange={handleChange}
+                placeholder="Demo video URL or public local path"
+                className={inputCls}
+              />
+              <input
+                type="file"
+                accept="video/*"
+                onChange={(event) => uploadMedia(event.target.files?.[0])}
+                className={fileCls}
+              />
+              {uploading && <p className="text-[11px] font-semibold text-blue-700">Uploading demo video...</p>}
+            </div>
+          </Field>
+
           <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
             <p className="text-xs leading-5 text-blue-800">
               Tip: Chapter editing can be added later. For now, create a new course if the lesson structure needs major changes.
@@ -191,7 +250,7 @@ export default function EditCourse() {
           </div>
 
           {error && <div className="app-error">{error}</div>}
-          {success && <div className="app-success">✓ {success}</div>}
+          {success && <div className="app-success">? {success}</div>}
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             <Link to="/instructor/dashboard" className="app-button-secondary flex-1">
@@ -225,6 +284,27 @@ function Field({ label, children }) {
   );
 }
 
+function VideoEmbed({ url }) {
+  const video = getVideoEmbed(url);
+
+  if (!video) return null;
+
+  if (video.type === "iframe") {
+    return (
+      <iframe
+        key={video.src}
+        src={video.src}
+        title="Demo video preview"
+        className="aspect-video w-full"
+        allow="accelerometer; autoplay; clipboard-write; compute-pressure; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+      />
+    );
+  }
+
+  return <video key={video.src} src={video.src} controls className="aspect-video w-full object-contain" />;
+}
+
 function Loader() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-transparent">
@@ -235,3 +315,7 @@ function Loader() {
 
 const inputCls =
   "w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 shadow-sm outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100";
+
+const fileCls =
+  "w-full cursor-pointer rounded-lg border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-500 shadow-sm file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-blue-700 hover:border-blue-200";
+

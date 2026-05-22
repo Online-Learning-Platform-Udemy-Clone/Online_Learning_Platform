@@ -10,6 +10,7 @@ export default function RateCourse() {
   const [course, setCourse] = useState(null);
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
+  const [isRatingGiven, setIsRatingGiven] = useState(false);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -44,8 +45,8 @@ export default function RateCourse() {
   }, [courseId, navigate]);
 
   const handleSubmit = async () => {
-    if (rating === 0) {
-      setError("Please select a star rating");
+    if (!isRatingGiven || rating === 0) {
+      setError("Please give a rating first");
       return;
     }
     if (!comment.trim()) {
@@ -108,7 +109,7 @@ export default function RateCourse() {
         </div>
 
         <div className="app-panel">
-          <div className="mb-6">
+          <div className={isRatingGiven ? "mb-6 border-b border-slate-200 pb-6" : "mb-6"}>
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
               Your rating
             </p>
@@ -117,7 +118,11 @@ export default function RateCourse() {
                 <button
                   key={star}
                   type="button"
-                  onClick={() => setRating(star)}
+                  onClick={() => {
+                    setRating(star);
+                    setIsRatingGiven(true);
+                    setError("");
+                  }}
                   onMouseEnter={() => setHovered(star)}
                   onMouseLeave={() => setHovered(0)}
                   className={`flex h-11 w-11 items-center justify-center rounded-lg border text-lg font-bold transition-all ${
@@ -138,26 +143,33 @@ export default function RateCourse() {
             </div>
           </div>
 
-          <div className="mb-6">
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Your review
-            </label>
-            <textarea
-              rows={5}
-              value={comment}
-              onChange={(event) => {
-                setComment(event.target.value);
-                setError("");
-              }}
-              placeholder="What worked well? What could be improved?"
-              className="app-textarea resize-none"
-            />
-            <p className="mt-2 text-right text-xs text-slate-500">{comment.length} characters</p>
-          </div>
+          {isRatingGiven ? (
+            <div className="mb-6">
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Add your comment
+              </label>
+              <textarea
+                rows={5}
+                value={comment}
+                onChange={(event) => {
+                  setComment(event.target.value);
+                  setError("");
+                }}
+                placeholder="What worked well? What could be improved?"
+                className="app-textarea resize-none"
+                autoFocus
+              />
+              <p className="mt-2 text-right text-xs text-slate-500">{comment.length} characters</p>
+            </div>
+          ) : (
+            <p className="mb-6 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              Select a star rating to add your comment.
+            </p>
+          )}
 
           {error && <div className="app-error mb-4">{error}</div>}
 
-          <button type="button" onClick={handleSubmit} disabled={submitting} className="app-button-primary w-full">
+          <button type="button" onClick={handleSubmit} disabled={submitting || !isRatingGiven} className="app-button-primary w-full">
             {submitting ? "Submitting..." : "Submit review"}
           </button>
         </div>
@@ -173,3 +185,4 @@ function Loader() {
     </div>
   );
 }
+

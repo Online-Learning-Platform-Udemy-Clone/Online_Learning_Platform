@@ -29,6 +29,14 @@ const enrollmentSchema=new Schema({
         min: 0,
         max: 100  
     },
+    timeSpentMinutes: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
+    lastStudiedAt: {
+        type: Date
+    },
    completedChapter: [{
     chapterId: {
       type: Types.ObjectId,

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import Navbar from "./components/Navbar";
+import LearningAssistant from "./components/LearningAssistant";
 import ProtectedRoute from "./components/Protectedroute";
 import HomePage from "./pages/HomePage";
 import Login from "./pages/Login";
@@ -16,9 +17,11 @@ import Wishlist from "./pages/student/Wishlist";
 import CoursePlayer from "./pages/student/Courseplayer";
 import RateCourse from "./pages/student/Ratecourse";
 import Certificate from "./pages/student/Certificate";
+import CompletedCourses from "./pages/student/CompletedCourses";
 import InstructorDashboard from "./pages/instructor/Instructordashboard";
 import CreateCourse from "./pages/instructor/Createcourse";
 import EditCourse from "./pages/instructor/Editcourses";
+import InstructorDoubts from "./pages/instructor/InstructorDoubts";
 
 import AdminDashboard from "./pages/admin/Admindashboard";
 import ManageUsers from "./pages/admin/Manageusers";
@@ -47,10 +50,12 @@ export default function App() {
                 <Route path="/student/learn/:id" element={<CoursePlayer />} />
                 <Route path="/student/review/:courseId" element={<RateCourse />} />
                 <Route path="/student/certificate/:courseId" element={<Certificate />} />
+                <Route path="/student/completed-courses" element={<CompletedCourses />} />
               </Route>
 
               <Route element={<ProtectedRoute allowedRoles={["INSTRUCTOR"]} />}>
                 <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
+                <Route path="/instructor/doubts" element={<InstructorDoubts />} />
                 <Route path="/instructor/courses/new" element={<CreateCourse />} />
                 <Route path="/instructor/courses/:id/edit" element={<EditCourse />} />
               </Route>
@@ -68,6 +73,7 @@ export default function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
+          <LearningAssistant />
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>

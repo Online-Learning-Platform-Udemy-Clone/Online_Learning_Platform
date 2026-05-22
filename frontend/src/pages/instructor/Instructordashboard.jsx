@@ -10,25 +10,61 @@ const STATUS_STYLE = {
 export default function InstructorDashboard() {
   const { user } = useAuth();
   const [courses, setCourses] = useState([]);
+  const [doubts, setDoubts] = useState([]);
+  const [replyDrafts, setReplyDrafts] = useState({});
+  const [replying, setReplying] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [toggling, setToggling] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
-    fetchCourses();
+    const fetchDashboard = async () => {
+      try {
+        const [coursesRes, doubtsRes] = await Promise.all([
+          fetch("/instructor-api/courses", { credentials: "include" }),
+          fetch("/instructor-api/doubts", { credentials: "include" }),
+        ]);
+        const coursesData = await coursesRes.json();
+        const doubtsData = await doubtsRes.json();
+        if (!coursesRes.ok) throw new Error(coursesData.message);
+        setCourses(coursesData.payload || []);
+        if (doubtsRes.ok) setDoubts(doubtsData.payload || []);
+      } catch (err) {
+        setError(err.message || "Failed to load courses");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
   }, []);
 
-  const fetchCourses = async () => {
+  const handleReply = async (doubtId) => {
+    const reply = replyDrafts[doubtId] || "";
+    if (!reply.trim()) {
+      setError("Reply cannot be empty");
+      return;
+    }
+
+    setReplying(doubtId);
+    setError("");
+
     try {
-      const res = await fetch("/instructor-api/courses", { credentials: "include" });
+      const res = await fetch(`/instructor-api/doubts/${doubtId}/reply`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ reply }),
+      });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      setCourses(data.payload);
+      if (!res.ok) throw new Error(data.message || "Failed to reply");
+      setDoubts((items) => items.map((item) => (item._id === doubtId ? data.payload : item)));
+      setReplyDrafts((items) => ({ ...items, [doubtId]: "" }));
     } catch (err) {
-      setError(err.message || "Failed to load courses");
+      setError(err.message || "Failed to reply");
     } finally {
-      setLoading(false);
+      setReplying(null);
     }
   };
 
@@ -77,6 +113,9 @@ export default function InstructorDashboard() {
 
   const activeCourses = courses.filter((c) => c.isCourseActive);
   const hiddenCourses = courses.filter((c) => !c.isCourseActive);
+  const lastSeenDoubts = Number(window.localStorage.getItem("instructor-doubts-last-seen") || 0);
+  const newDoubts = doubts.filter((doubt) => new Date(doubt.createdAt).getTime() > lastSeenDoubts).length;
+  const pendingDoubts = doubts.filter((doubt) => doubt.status !== "Answered").length;
 
   return (
     <main className="app-page">
@@ -87,8 +126,8 @@ export default function InstructorDashboard() {
               className="absolute inset-0 bg-slate-950/45 backdrop-blur-sm"
               onClick={() => setConfirmDelete(null)}
             />
-            <div className="relative w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-rose-600">
+            <div className="relative w-full max-w-sm rounded-lg border border-slate-200 bg-white p-6 shadow-2xl">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-rose-100 bg-rose-50 text-rose-600">
                 <WarningIcon />
               </div>
 
@@ -133,7 +172,7 @@ export default function InstructorDashboard() {
           </Link>
         </div>
 
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-4">
           {[
             { label: "Total Courses", value: courses.length, color: "text-slate-950", accent: "bg-blue-500" },
             { label: "Active", value: activeCourses.length, color: "text-emerald-700", accent: "bg-emerald-500" },
@@ -145,6 +184,20 @@ export default function InstructorDashboard() {
               <p className="mt-1 text-sm font-semibold text-slate-500">{stat.label}</p>
             </div>
           ))}
+          <Link to="/instructor/doubts" className="app-stat-card relative overflow-hidden transition hover:-translate-y-0.5 hover:shadow-lg">
+            <span className="absolute left-0 top-0 h-full w-1 bg-amber-500" />
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-3xl font-extrabold text-amber-700">{pendingDoubts}</p>
+                <p className="mt-1 text-sm font-semibold text-slate-500">Student Doubts</p>
+              </div>
+              {newDoubts > 0 && (
+                <span className="rounded-full bg-blue-600 px-2 py-1 text-xs font-black text-white">
+                  {newDoubts} new msg
+                </span>
+              )}
+            </div>
+          </Link>
         </div>
 
         {loading && (
@@ -156,8 +209,8 @@ export default function InstructorDashboard() {
         {error && <div className="app-error mb-6">{error}</div>}
 
         {!loading && courses.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white/70 py-20 text-center shadow-sm">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-950 text-white">
+          <div className="rounded-lg border border-dashed border-slate-300 bg-white/70 py-20 text-center shadow-sm">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-slate-950 text-white">
               <CourseIcon />
             </div>
             <p className="mb-4 text-sm font-semibold text-slate-600">
@@ -211,10 +264,93 @@ export default function InstructorDashboard() {
   );
 }
 
+function InstructorDoubtsPanel({ doubts, replyDrafts, replying, onReplyChange, onReply }) {
+  return (
+    <section className="app-panel mb-8">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="app-eyebrow">Student doubts</p>
+          <h2 className="text-xl font-semibold text-slate-950">Reply to enrolled learners</h2>
+        </div>
+        <p className="max-w-md text-sm leading-6 text-slate-500">
+          Doubts appear here only when the student is registered in one of your courses.
+        </p>
+      </div>
+
+      {doubts.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
+          No student doubts yet.
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {doubts.slice(0, 6).map((doubt) => {
+            const studentName = [doubt.student?.firstName, doubt.student?.lastName].filter(Boolean).join(" ") || doubt.student?.email || "Student";
+            const instructorName = [doubt.repliedBy?.firstName, doubt.repliedBy?.lastName].filter(Boolean).join(" ") || doubt.repliedBy?.email || "Instructor";
+
+            return (
+              <article key={doubt._id} className="rounded-xl border border-slate-200 bg-white p-4">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <h3 className="text-sm font-bold text-slate-950">{doubt.topic}</h3>
+                  {doubt.audience === "instructor" && (
+                    <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                      Direct to instructor
+                    </span>
+                  )}
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    doubt.status === "Answered" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
+                  }`}>
+                    {doubt.status}
+                  </span>
+                </div>
+                <p className="text-xs font-semibold text-slate-500">
+                  {studentName} | {doubt.course?.title || "Course"}
+                </p>
+                {(doubt.chapterTitle || doubt.unitTitle) && (
+                  <p className="mt-1 text-xs font-semibold text-blue-700">
+                    {[doubt.chapterTitle, doubt.unitTitle].filter(Boolean).join(" | ")}
+                  </p>
+                )}
+                <p className="mt-2 text-sm leading-6 text-slate-700">{doubt.description}</p>
+
+                {doubt.instructorReply && (
+                  <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-3">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-700">
+                      Reply from {instructorName}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-emerald-950">{doubt.instructorReply}</p>
+                  </div>
+                )}
+
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <textarea
+                    rows={2}
+                    value={replyDrafts[doubt._id] || ""}
+                    onChange={(event) => onReplyChange((items) => ({ ...items, [doubt._id]: event.target.value }))}
+                    placeholder={doubt.instructorReply ? "Update your reply" : "Write a reply for this student"}
+                    className="app-textarea resize-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => onReply(doubt._id)}
+                    disabled={replying === doubt._id}
+                    className="app-button-primary shrink-0 sm:self-start"
+                  >
+                    {replying === doubt._id ? "Sending..." : doubt.instructorReply ? "Update" : "Reply"}
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function CourseRow({ course, toggling, onDelete, onActivate, isActive }) {
   return (
     <div
-      className={`flex flex-col gap-4 rounded-2xl border bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg sm:flex-row sm:items-center ${
+      className={`flex flex-col gap-4 rounded-lg border bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg sm:flex-row sm:items-center ${
         isActive ? "border-slate-200" : "border-slate-200 opacity-75"
       }`}
     >

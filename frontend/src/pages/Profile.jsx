@@ -64,21 +64,11 @@ function formatDate(date) {
   });
 }
 
-function hasCertificateAccess(enrollment) {
-  const coursePrice = Number(enrollment?.course?.price || 0);
-  const payment = enrollment?.payment;
-  const paymentAmount = typeof payment === "object" ? Number(payment?.amount || 0) : 0;
-  const paymentStatus = typeof payment === "object" ? payment?.status : null;
-
-  return coursePrice > 0 || (paymentAmount > 0 && paymentStatus === "SUCCESS");
-}
-
 export default function Profile() {
   const { user, updateUser } = useAuth();
   const [profile, setProfile] = useState(user || null);
   const [form, setForm] = useState(emptyForm);
   const [stats, setStats] = useState([]);
-  const [completedCourses, setCompletedCourses] = useState([]);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -125,7 +115,6 @@ export default function Profile() {
           if (!res.ok) throw new Error(data.message);
           const enrollments = data.payload || [];
           const completed = enrollments.filter((item) => item.status === "Completed" && item.course);
-          setCompletedCourses(completed);
           setStats([
             { label: "Enrolled", value: enrollments.length },
             { label: "Completed", value: completed.length },
@@ -134,7 +123,6 @@ export default function Profile() {
         }
 
         if (profile.role === "INSTRUCTOR") {
-          setCompletedCourses([]);
           const res = await fetch("/instructor-api/courses", { credentials: "include" });
           const data = await res.json();
           if (!res.ok) throw new Error(data.message);
@@ -147,7 +135,6 @@ export default function Profile() {
         }
 
         if (profile.role === "ADMIN") {
-          setCompletedCourses([]);
           const [usersRes, coursesRes] = await Promise.all([
             fetch("/admin-api/users", { credentials: "include" }),
             fetch("/admin-api/courses", { credentials: "include" }),
@@ -166,7 +153,6 @@ export default function Profile() {
         }
       } catch {
         setStats([]);
-        setCompletedCourses([]);
       }
     };
 
@@ -291,6 +277,11 @@ export default function Profile() {
             <Link to={roleInfo.primaryLink} className="app-button-secondary">
               {roleInfo.primaryLabel}
             </Link>
+            {profile?.role === "STUDENT" && (
+              <Link to="/student/completed-courses" className="app-button-secondary">
+                Completed Courses
+              </Link>
+            )}
             <button type="button" onClick={() => setEditing((value) => !value)} className="app-button-primary">
               {editing ? "View Profile" : "Edit Profile"}
             </button>
@@ -445,9 +436,6 @@ export default function Profile() {
                 </div>
               </div>
 
-              {profile?.role === "STUDENT" && (
-                <CompletedCourses courses={completedCourses} />
-              )}
             </section>
           )}
         </div>
@@ -521,75 +509,6 @@ export default function Profile() {
   );
 }
 
-function CompletedCourses({ courses }) {
-  return (
-    <div className="app-panel p-6">
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div>
-          <h3 className="text-lg font-bold text-slate-950">Completed Courses</h3>
-          <p className="mt-1 text-sm text-slate-500">
-            View your finished courses and open eligible certificates.
-          </p>
-        </div>
-        <Link to="/student/dashboard" className="app-button-secondary px-4 py-2 text-sm">
-          My Learning
-        </Link>
-      </div>
-
-      {courses.length === 0 ? (
-        <div className="mt-5 rounded-lg border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
-          Completed courses will appear here after you finish a course.
-        </div>
-      ) : (
-        <div className="mt-5 grid gap-4">
-          {courses.map((enrollment) => {
-            const course = enrollment.course;
-            const courseId = course?._id ?? course;
-            const certificateReady = hasCertificateAccess(enrollment);
-
-            return (
-              <div
-                key={enrollment._id}
-                className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
-                      Completed
-                    </span>
-                    <span className="text-xs font-semibold text-slate-500">
-                      {formatDate(enrollment.updatedAt)}
-                    </span>
-                  </div>
-                  <h4 className="mt-2 truncate text-base font-bold text-slate-950">
-                    {course?.title || "Course"}
-                  </h4>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {course?.category || "Learning"} • {certificateReady ? "Certificate ready" : "Certificate payment required"}
-                  </p>
-                </div>
-
-                <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                  <Link to={`/student/learn/${courseId}`} className="app-button-secondary px-4 py-2 text-sm">
-                    Review Course
-                  </Link>
-                  <Link
-                    to={certificateReady ? `/student/certificate/${courseId}` : `/student/payment/${courseId}`}
-                    state={!certificateReady ? { certificate: true } : undefined}
-                    className="app-button-primary px-4 py-2 text-sm"
-                  >
-                    {certificateReady ? "View Certificate" : "Get Certificate"}
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function Field({ label, children }) {
   return (
     <div>
@@ -600,3 +519,4 @@ function Field({ label, children }) {
     </div>
   );
 }
+

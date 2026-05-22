@@ -1,4 +1,4 @@
-@import "tailwindcss";
+  @import "tailwindcss";
 
 @layer base {
   :root {
@@ -68,7 +68,7 @@
 @layer components {
   .app-page {
     min-height: 100vh;
-    background: radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 24%), linear-gradient(180deg, var(--app-bg) 0%, var(--app-bg-soft) 100%);
+    background: linear-gradient(180deg, var(--app-bg) 0%, var(--app-bg-soft) 100%);
     padding: 2.5rem 1rem;
     color: var(--app-text);
   }
@@ -86,14 +86,14 @@
   }
 
   .app-card {
-    border-radius: 1.5rem;
+    border-radius: 0.75rem;
     border: 1px solid var(--app-border);
     background: var(--app-surface);
     box-shadow: 0 22px 45px -30px var(--app-shadow);
   }
 
   .app-panel {
-    border-radius: 1.75rem;
+    border-radius: 0.875rem;
     border: 1px solid var(--app-border);
     background: color-mix(in srgb, var(--app-surface) 96%, transparent);
     padding: 1.5rem;
@@ -110,7 +110,7 @@
   }
 
   .app-stat-card {
-    border-radius: 1.5rem;
+    border-radius: 0.875rem;
     border: 1px solid var(--app-border);
     padding: 1.3rem 1.4rem;
     background: var(--app-surface);
@@ -149,7 +149,7 @@
   .app-input,
   .app-textarea {
     width: 100%;
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     border: 1px solid var(--app-border-strong);
     background: var(--app-surface);
     padding: 0.9rem 1rem;
@@ -170,7 +170,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     padding: 0.85rem 1.5rem;
     font-size: 0.95rem;
     font-weight: 700;
@@ -226,7 +226,7 @@
   }
 
   .app-error {
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     border: 1px solid #fecaca;
     background: #fef2f2;
     padding: 1rem;
@@ -235,7 +235,7 @@
   }
 
   .app-success {
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     border: 1px solid #bbf7d0;
     background: #ecfdf5;
     padding: 1rem;
@@ -302,6 +302,22 @@
     background: var(--app-surface-muted);
     transform: translateY(-1px);
   }
+
+  .app-skeleton {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: var(--app-surface-muted);
+  }
+
+  .app-skeleton::after {
+    animation: shimmer 1.25s infinite;
+    background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.18), transparent);
+    content: "";
+    inset: 0;
+    position: absolute;
+    transform: translateX(-100%);
+  }
 }
 
 @layer utilities {
@@ -366,5 +382,11 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }

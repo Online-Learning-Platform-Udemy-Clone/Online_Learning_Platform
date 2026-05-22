@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { getVideoEmbed } from "../../utils/media";
 
 function formatPrice(price) {
   return Number(price || 0) === 0 ? "Free" : `Rs. ${Number(price).toLocaleString("en-IN")}`;
@@ -123,6 +124,19 @@ export default function CourseDetail() {
           </div>
 
           <aside className="app-panel h-fit">
+            {course.demoVideo && (
+              <div className="mb-6">
+                <p className="mb-3 text-sm font-bold text-slate-950">Watch demo class</p>
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-950">
+                  <VideoEmbed url={course.demoVideo} />
+                </div>
+                {!isEnrolled && (
+                  <p className="mt-2 text-xs leading-5 text-slate-500">
+                    Preview the teaching style before enrolling.
+                  </p>
+                )}
+              </div>
+            )}
             <p className="text-3xl font-bold text-blue-700">{formatPrice(course.price)}</p>
             <p className="mt-1 text-sm text-slate-500">
               {Number(course.price || 0) === 0 ? "No payment needed" : "One-time payment"}
@@ -164,7 +178,7 @@ export default function CourseDetail() {
                       type="button"
                       onClick={toggleWishlist}
                       disabled={wishlistLoading}
-                      className={`w-full rounded-2xl border px-4 py-3 text-sm font-bold transition-colors disabled:opacity-60 ${
+                      className={`w-full rounded-lg border px-4 py-3 text-sm font-bold transition-colors disabled:opacity-60 ${
                         isWishlisted
                           ? "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
                           : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:text-blue-700"
@@ -180,10 +194,12 @@ export default function CourseDetail() {
             <ul className="mt-6 space-y-3 border-t border-slate-200 pt-5 text-sm text-slate-600">
               {[
                 "Full lifetime access",
-                `${course.chapters?.length ?? 0} chapters with videos`,
+                course.demoVideo ? "Demo class available before enrollment" : null,
+                `${course.chapters?.length ?? 0} chapters`,
+                `${course.chapters?.reduce((sum, chapter) => sum + (chapter.units?.length ?? 0), 0) ?? 0} units`,
                 "Progress tracking",
                 "Review after completion",
-              ].map((item) => (
+              ].filter(Boolean).map((item) => (
                 <li key={item} className="flex gap-2">
                   <span className="font-bold text-emerald-600">✓</span>
                   <span>{item}</span>
@@ -203,8 +219,13 @@ export default function CourseDetail() {
                     {index + 1}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="line-clamp-2 text-sm leading-6 text-slate-700">{chapter.textContent}</p>
-                    {chapter.videoContent && <p className="mt-1 text-xs font-semibold text-blue-700">Video included</p>}
+                    <h3 className="mb-1 text-sm font-bold text-slate-950">{chapter.title || `Chapter ${index + 1}`}</h3>
+                    <p className="mt-1 text-xs font-semibold text-blue-700">
+                      {chapter.units?.length ?? 0} unit{chapter.units?.length === 1 ? "" : "s"} | {(chapter.quiz?.length ?? 0) > 0 ? "1 assignment" : "0 assignments"}
+                    </p>
+                    {(chapter.units ?? []).some((unit) => unit.videoContent || unit.documentContent) && (
+                      <p className="mt-1 text-xs font-semibold text-slate-500">Unit media included</p>
+                    )}
                   </div>
                   {!isEnrolled && <span className="text-xs font-semibold text-slate-400">Locked</span>}
                 </div>
@@ -240,6 +261,27 @@ export default function CourseDetail() {
   );
 }
 
+function VideoEmbed({ url }) {
+  const video = getVideoEmbed(url);
+
+  if (!video) return null;
+
+  if (video.type === "iframe") {
+    return (
+      <iframe
+        key={video.src}
+        src={video.src}
+        title="Demo class preview"
+        className="aspect-video w-full"
+        allow="accelerometer; autoplay; clipboard-write; compute-pressure; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+      />
+    );
+  }
+
+  return <video key={video.src} src={video.src} controls className="aspect-video w-full object-contain" />;
+}
+
 function Loader() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-transparent">
@@ -261,3 +303,4 @@ function ErrorView({ message }) {
     </div>
   );
 }
+
