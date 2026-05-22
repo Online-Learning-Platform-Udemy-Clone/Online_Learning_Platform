@@ -1,7 +1,11 @@
 const API_PATH_PREFIXES = ["/auth", "/student-api", "/instructor-api", "/admin-api", "/uploads"];
+const DEFAULT_PRODUCTION_API_BASE_URL = "https://online-learning-platform-6-52ml.onrender.com";
 
 function getApiBaseUrl() {
-  return (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+  const configuredUrl = import.meta.env.VITE_API_BASE_URL || "";
+  const fallbackUrl = import.meta.env.PROD ? DEFAULT_PRODUCTION_API_BASE_URL : "";
+
+  return (configuredUrl || fallbackUrl).replace(/\/$/, "");
 }
 
 function shouldUseApiBase(input) {
