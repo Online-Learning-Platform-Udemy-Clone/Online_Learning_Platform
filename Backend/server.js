@@ -1,6 +1,6 @@
 import exp from 'express'
 import {config} from 'dotenv'
-import {connect} from 'mongoose'
+import mongoose from 'mongoose'
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
@@ -16,6 +16,7 @@ config();
 const app=exp();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const port=process.env.PORT || 1935;
 
 //CORS middleware
 app.use(cors({
@@ -33,7 +34,15 @@ app.use("/uploads", exp.static(path.join(__dirname, "uploads")));
 app.get("/", (req, res) => {
   res.status(200).json({
     message: "ATP Pro API is running",
+    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
     routes: ["/auth", "/student-api", "/instructor-api", "/admin-api"],
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
   });
 });
 
@@ -51,19 +60,25 @@ app.get("/", (req, res) => {
 const connectDB=async()=>{
     try
     {
-        await connect(process.env.DB_URL);
+        if(!process.env.DB_URL)
+        {
+            console.log("DB_URL is missing. Add a MongoDB connection string in environment variables.");
+            return;
+        }
+
+        await mongoose.connect(process.env.DB_URL);
         console.log("DB Server connected");
-        //asssign port
-        const port=process.env.PORT || 1935
-        app.listen(port,()=>console.log(`server listening on ${port}...`));
     }
     catch(err)
     {
-        console.log("err in db connect",err.message);
+        console.log("DB connection failed:",err.message);
+        console.log("If this is deployed on Render, use a MongoDB Atlas DB_URL instead of mongodb://localhost:27017/...");
     }
 };
 
 connectDB();
+
+app.listen(port,()=>console.log(`server listening on ${port}...`));
 
 //to handle invalid path
 app.use((req,res,next)=>{
