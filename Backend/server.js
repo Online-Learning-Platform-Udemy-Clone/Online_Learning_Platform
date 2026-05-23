@@ -17,16 +17,27 @@ const app=exp();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const port=process.env.PORT || 1935;
+
+const parseOrigins = (value = "") =>
+  value
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
-  process.env.FRONTEND_URL
+  'https://online-learning-platform-7sz9.vercel.app',
+  ...parseOrigins(process.env.FRONTEND_URL),
+  ...parseOrigins(process.env.FRONTEND_URLS),
 ].filter(Boolean);
 
 //CORS middleware
 app.use(cors({
   origin: (origin, callback) => {
-    if(!origin || allowedOrigins.includes(origin)) {
+    const normalizedOrigin = origin?.replace(/\/$/, "");
+
+    if(!normalizedOrigin || allowedOrigins.includes(normalizedOrigin)) {
       return callback(null, true);
     }
 
