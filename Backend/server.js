@@ -36,7 +36,7 @@ const allowedOrigins = [
 function isAllowedVercelOrigin(origin) {
   try {
     const { hostname, protocol } = new URL(origin);
-    return protocol === "https:" && hostname.startsWith("online-learning-platform-") && hostname.endsWith(".vercel.app");
+    return protocol === "https:" && hostname.endsWith(".vercel.app");
   } catch {
     return false;
   }
