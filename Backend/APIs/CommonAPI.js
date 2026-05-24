@@ -13,6 +13,13 @@ export const commonApp=exp.Router();
 
 const {sign}=jwt;
 
+function missingServerConfigResponse(res, name) {
+    return res.status(500).json({
+        message:"Server configuration error",
+        error:`${name} is missing. Add it in Render Environment variables and redeploy.`
+    });
+}
+
 function sanitizeUser(userDocument) {
     const userObj = userDocument.toObject();
     delete userObj.password;
@@ -20,6 +27,12 @@ function sanitizeUser(userDocument) {
 }
 
 function createAuthToken(user) {
+    if(!process.env.SECRET_KEY) {
+        const error = new Error("SECRET_KEY is missing");
+        error.name = "ServerConfigError";
+        throw error;
+    }
+
     return sign({
         id: user._id,
         email: user.email,
@@ -90,8 +103,16 @@ commonApp.post("/login",async(req,res)=>{
         //get user cred obj from req
         const {email,password}=req.body;
 
+        if(!process.env.SECRET_KEY) {
+            return missingServerConfigResponse(res, "SECRET_KEY");
+        }
+
+        if(!email || !password) {
+            return res.status(400).json({message:"Email and password are required"});
+        }
+
         //find user by email
-        const user=await UserModel.findOne({email:email, isUserActive: true});
+        const user=await UserModel.findOne({email:email.trim(), isUserActive: true});
 
         //if user not found
         if(!user){
@@ -117,6 +138,9 @@ commonApp.post("/login",async(req,res)=>{
     } catch (err) {
         console.error("[Login Error]", err.message || JSON.stringify(err));
         console.error(err.stack);
+        if(err.name === "ServerConfigError") {
+            return missingServerConfigResponse(res, "SECRET_KEY");
+        }
         res.status(500).json({ message: "error occurred", error: err.message || "Unknown error" });
     }
 })
