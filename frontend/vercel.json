@@ -2,23 +2,23 @@
   "rewrites": [
     {
       "source": "/auth/:path*",
-      "destination": "https://online-learning-platform-6-52ml.onrender.com/auth/:path*"
+      "destination": "https://online-learning-platform-10-i74w.onrender.com/auth/:path*"
     },
     {
       "source": "/student-api/:path*",
-      "destination": "https://online-learning-platform-6-52ml.onrender.com/student-api/:path*"
+      "destination": "https://online-learning-platform-10-i74w.onrender.com/student-api/:path*"
     },
     {
       "source": "/instructor-api/:path*",
-      "destination": "https://online-learning-platform-6-52ml.onrender.com/instructor-api/:path*"
+      "destination": "https://online-learning-platform-10-i74w.onrender.com/instructor-api/:path*"
     },
     {
       "source": "/admin-api/:path*",
-      "destination": "https://online-learning-platform-6-52ml.onrender.com/admin-api/:path*"
+      "destination": "https://online-learning-platform-10-i74w.onrender.com/admin-api/:path*"
     },
     {
       "source": "/uploads/:path*",
-      "destination": "https://online-learning-platform-6-52ml.onrender.com/uploads/:path*"
+      "destination": "https://online-learning-platform-10-i74w.onrender.com/uploads/:path*"
     }
   ]
 }
