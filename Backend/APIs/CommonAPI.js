@@ -5,6 +5,7 @@ import { CourseModel } from '../Models/CourseModel.js';
 import { hash, compare } from "bcryptjs";
 import { verifyToken } from "../Middlewares/verifyToken.js";
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
 config();
 
@@ -161,6 +162,13 @@ commonApp.get("/logout",(req,res)=>{
 //Public route for homepage course previews
 commonApp.get("/courses", async(req,res,next)=>{
     try {
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({
+                message:"Database is not connected",
+                error:"Set DB_URL on Render to a MongoDB Atlas connection string and allow Render in Atlas Network Access."
+            });
+        }
+
         const courseList = await CourseModel.find({isCourseActive:true});
         res.status(200).json({message:"All active courses",payload:courseList});
     } catch (err) {

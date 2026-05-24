@@ -51,12 +51,26 @@ app.use(exp.json());
 //add cookie parser middleware
 app.use(cookieParser());
 app.use("/uploads", exp.static(path.join(__dirname, "uploads")));
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
+function getDatabaseStatus() {
+  const isConnected = mongoose.connection.readyState === 1;
+
+  return {
+    database: isConnected ? "connected" : "disconnected",
+    ...(isConnected
+      ? {}
+      : {
+          fix: "Set DB_URL on Render to a MongoDB Atlas connection string and allow Render in Atlas Network Access.",
+        }),
+  };
+}
 
 //health check route
 app.get("/", (req, res) => {
   res.status(200).json({
     message: "ATP Pro API is running",
-    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    ...getDatabaseStatus(),
     routes: ["/auth", "/student-api", "/instructor-api", "/admin-api"],
   });
 });
@@ -64,7 +78,7 @@ app.get("/", (req, res) => {
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "ok",
-    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    ...getDatabaseStatus(),
   });
 });
 
@@ -131,6 +145,13 @@ app.use((err, req, res, next) => {
     return res.status(409).json({
       message: "error occurred",
       error: `${field} "${value}" already exists`,
+    });
+  }
+
+  if (err.name === "MongooseServerSelectionError" || err.name === "MongoServerSelectionError") {
+    return res.status(503).json({
+      message: "Database is not connected",
+      error: "Set DB_URL on Render to a MongoDB Atlas connection string and allow Render in Atlas Network Access.",
     });
   }
 
