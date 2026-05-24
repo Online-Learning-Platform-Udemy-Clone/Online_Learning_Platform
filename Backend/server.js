@@ -33,12 +33,21 @@ const allowedOrigins = [
   ...parseOrigins(process.env.FRONTEND_URLS),
 ].filter(Boolean);
 
+function isAllowedVercelOrigin(origin) {
+  try {
+    const { hostname, protocol } = new URL(origin);
+    return protocol === "https:" && hostname.startsWith("online-learning-platform-") && hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+
 //CORS middleware
 app.use(cors({
   origin: (origin, callback) => {
     const normalizedOrigin = origin?.replace(/\/$/, "");
 
-    if(!normalizedOrigin || allowedOrigins.includes(normalizedOrigin)) {
+    if(!normalizedOrigin || allowedOrigins.includes(normalizedOrigin) || isAllowedVercelOrigin(normalizedOrigin)) {
       return callback(null, true);
     }
 
