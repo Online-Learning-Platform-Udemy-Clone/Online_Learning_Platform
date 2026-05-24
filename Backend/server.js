@@ -28,6 +28,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'https://online-learning-platform-7sz9.vercel.app',
+  'https://online-learning-platform-gzvc.vercel.app',
   ...parseOrigins(process.env.FRONTEND_URL),
   ...parseOrigins(process.env.FRONTEND_URLS),
 ].filter(Boolean);
