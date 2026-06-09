@@ -1,0 +1,170 @@
+import exp from 'express'
+import {config} from 'dotenv'
+import mongoose from 'mongoose'
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import {studentApp} from "./APIs/StudentAPI.js";
+import {instructorApp} from "./APIs/InstructorAPI.js";
+import {adminApp} from "./APIs/AdminAPI.js";
+import {commonApp} from "./APIs/CommonAPI.js";
+
+config();
+
+const app=exp();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const port=process.env.PORT || 1935;
+
+const parseOrigins = (value = "") =>
+  value
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://online-learning-platform-7sz9.vercel.app',
+  'https://online-learning-platform-gzvc.vercel.app',
+  ...parseOrigins(process.env.FRONTEND_URL),
+  ...parseOrigins(process.env.FRONTEND_URLS),
+].filter(Boolean);
+
+function isAllowedVercelOrigin(origin) {
+  try {
+    const { hostname, protocol } = new URL(origin);
+    return protocol === "https:" && hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+
+//CORS middleware
+app.use(cors({
+  origin: (origin, callback) => {
+    const normalizedOrigin = origin?.replace(/\/$/, "");
+
+    if(!normalizedOrigin || allowedOrigins.includes(normalizedOrigin) || isAllowedVercelOrigin(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Origin not allowed by CORS"));
+  },
+  credentials: true
+}));
+
+//body parser middleware
+app.use(exp.json());
+//add cookie parser middleware
+app.use(cookieParser());
+app.use("/uploads", exp.static(path.join(__dirname, "uploads")));
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
+function getDatabaseStatus() {
+  const isConnected = mongoose.connection.readyState === 1;
+
+  return {
+    database: isConnected ? "connected" : "disconnected",
+    ...(isConnected
+      ? {}
+      : {
+          fix: "Set DB_URL on Render to a MongoDB Atlas connection string and allow Render in Atlas Network Access.",
+        }),
+  };
+}
+
+//health check route
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "ATP Pro API is running",
+    ...getDatabaseStatus(),
+    routes: ["/auth", "/student-api", "/instructor-api", "/admin-api"],
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    ...getDatabaseStatus(),
+  });
+});
+
+//path level middleware
+    //user
+    app.use("/student-api",studentApp);
+    //author
+    app.use("/instructor-api",instructorApp);
+    //admin
+    app.use("/admin-api",adminApp);
+    //for common operations
+    app.use("/auth",commonApp)
+
+//connect to db
+const connectDB=async()=>{
+    try
+    {
+        if(!process.env.DB_URL)
+        {
+            console.log("DB_URL is missing. Add a MongoDB connection string in environment variables.");
+            return;
+        }
+
+        await mongoose.connect(process.env.DB_URL);
+        console.log("DB Server connected");
+    }
+    catch(err)
+    {
+        console.log("DB connection failed:",err.message);
+        console.log("If this is deployed on Render, use a MongoDB Atlas DB_URL instead of mongodb://localhost:27017/...");
+    }
+};
+
+connectDB();
+
+app.listen(port,()=>console.log(`server listening on ${port}...`));
+
+//to handle invalid path
+app.use((req,res,next)=>{
+    console.log(req.url)
+    res.status(404).json({message:`Path ${req.url} is Invalid `});
+})
+
+//Error handling middleware
+app.use((err, req, res, next) => {
+  console.log("Error name:", err.name);
+  console.log("Error code:", err.code);
+  console.log("Error cause:", err.cause);
+  console.log("Full error:", JSON.stringify(err, null, 2));
+  //ValidationError
+  if (err.name === "ValidationError") {
+    return res.status(400).json({ message: "error occurred", error: err.message });
+  }
+  //CastError
+  if (err.name === "CastError") {
+    return res.status(400).json({ message: "error occurred", error: err.message });
+  }
+  const errCode = err.code ?? err.cause?.code ?? err.errorResponse?.code;
+  const keyValue = err.keyValue ?? err.cause?.keyValue ?? err.errorResponse?.keyValue;
+
+  if (errCode === 11000) {
+    const field = Object.keys(keyValue)[0];
+    const value = keyValue[field];
+    return res.status(409).json({
+      message: "error occurred",
+      error: `${field} "${value}" already exists`,
+    });
+  }
+
+  if (err.name === "MongooseServerSelectionError" || err.name === "MongoServerSelectionError") {
+    return res.status(503).json({
+      message: "Database is not connected",
+      error: "Set DB_URL on Render to a MongoDB Atlas connection string and allow Render in Atlas Network Access.",
+    });
+  }
+
+  //send server side error
+  res.status(500).json({ message: "error occurred", error: "Server side error" });
+});
