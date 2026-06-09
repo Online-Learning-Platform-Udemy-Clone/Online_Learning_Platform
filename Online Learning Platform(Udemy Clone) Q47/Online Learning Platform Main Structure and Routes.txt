@@ -1,0 +1,134 @@
+Online Learning Platform:
+
+11. Online Learning Platform (Udemy Clone)
+- Features
+* User authentication Student / Instructor / Admin)
+* Course creation by instructors
+* Course browsing & search
+* Video lecture streaming
+* Course enrollment system
+* Progress tracking for students
+* Course reviews & ratings
+* Instructor dashboard to manage courses
+* Student dashboard to track enrolled courses
+
+There are three types of users: 
+- Student
+- Instructor
+- Admin
+
+- The Default Page on Opening contains OnlineLearningPlatform Logo on the Left-Side of the Navbar and Home, Register, Login on the Right Side of the Navbar.
+- We can view some introduction regarding the Platform in the main body, and then there is a Get Started Button
+- Below this we can see All Courses, where we can just view the Demo Course
+- The Enroll Option in Demo Course is visible only when Student is logged in; So when Student is not logged in, it will show get started in the same place 
+
+1) Student:
+- Register
+Student can upload his Profile Image if he wishes to
+- Login
+* There will be a Forgot Password Option; Which will allow us to change the password by sending a Request to Email(Dummy); Then it will ask us to type the Required OTP; Then we can change the password to the account
+- See Courses
+In Course there are four categories:
+* See All Courses [This will be available in Home also; There will be no button specifically in Home Page for any course option as Only All Course are displayed]
+* See Enrolled Course [This should be available by default in Dashboard]
+* See Dropped Courses [Should Click on the Respective Button]; Dropped Course can be Re-Enrolled (So Re-Enroll Option should be available in the Course Card)
+* See In Progress Courses [Should Click on the Respective Button]
+* See Completed Courses [Should Click on the Respective Button]; Completed Course can be Re-Enrolled (So Re-Enroll Option should be available in the Course Card)
+
+- In Student's Profile, there should be a Drop Down Box next to it:
+It contains:
+* My Profile to view Student Current Data [Which Internally contains Edit Profile button to edit Student Data(Cannot Edit Email); Does not have password option]
+* Change Password [Current Password, New Password and New Password Confirmation and then click change password]
+* My Certificates {It contains both Completed Course Certificates and Course Certification Certificate}
+* Logout
+
+- Student after logging in can click on a Course: If the Course is not enrolled, the button will show enroll course, if course is already enrolled, it will show continue
+- Course if of two types: 
+* Free Course
+- For this Course, user just need to enroll the course(click on the enroll button and confirm enrollment); There will be no payment gateway; Then he can view the chapters for free
+- For Writing the Exam, there will be a Payment Gateway
+* Paid Course
+- For this Course, user need to click on the enroll button, a payment gateway is generated, he has to enter his types of payment, payment id and click pay, then it will generate a transaction id and attach it to enrollment schema respective to the student; Then he can view the chapters after enrolling only; Till then they are locked
+
+- Wishlist: 
+* There are two button inside a Demo Course; One is Enroll Course and Other is Add to Wishlist
+* Enroll Course will allow Student to Enroll into a Course
+* Add to Wishlist will allow Student to add the Course to his Wishlist
+
+- Progress Tracking: 
+* This follows a Progress Tracking where Progress = Number of Chapters Completed/Total Number of Chapters x 100% [It will show only integer value]
+* If the Student Progress is 100%, he will get the Course Completion Certificate
+* If the Student Progress is 100%, he can then only write the Exam
+
+- Exam: 
+* If Student scores more than 60% in the Exam, then only he will get the Course Certification Certificate
+* Else he will get the message please try again
+
+- Add Review: 
+Student can add review to the Course. Review contains three parts: 
+* Student Name/(Email if not available); Default from Token
+* Rating [1 Star to 5 Stars; Stars will be there; Click on the Respective Star]
+* Comment
+Note: Each Student can give only one Review to a Enrolled Course; If he enrolls in the Course again, then he
+
+
+
+2) Instructor: 
+- Register
+Instructor can upload his Profile Image if he wishes to
+- Login
+* There will be a Forgot Password Option; Which will allow us to change the password by sending a Request to Email(Dummy); Then it will ask us to type the Required OTP; Then we can change the password to the account
+- See Courses
+In Course there are four categories:
+* See Own Courses [This will be available in Home also; There will be no button specifically in Home Page for any course option as Only All Course are displayed]
+* See Incomplete Course [This should be available by default in Dashboard]
+* See Complete Courses [Should Click on the Respective Button]
+* See Deleted Course [Should Click on the Respective Button]
+
+- In Instructor's Profile, there should be a Drop Down Box next to it:
+It contains:
+* My Profile to view Student Current Data [Which Internally contains Edit Profile button to edit Instructor Data(Cannot Edit Email); Does not have password option]
+* Change Password [Current Password, New Password and New Password Confirmation and then click change password]
+* Logout
+
+- Instructor after logging in can click on a Course:
+* Inside the Course, he has the option to edit a Course which can edit only course details not the chapter details and on updating the course details the chapter details should not change
+* He can soft delete the course(Deactivate the Course); He can soft activate the course if the course was deactivated by user himself(Not when it was deactivated by admin)
+* He can permanently delete the course; This deletion can be activated only by the Admin(Still Soft Delete but cannot be re-activated by the User)
+* He can add chapters for Course Completion
+* He can add exams for Course Certification
+
+- Chapter/Unit: 
+* Can create a Chapter
+* Can view a Chapter
+* Can edit a Chapter
+* Can delete a Chapter [If a Chapter is Deleted the next chapter will become the 1st Chapter(Sequential)] {Chapter Deletion is also Soft Delete; It will be available in the deleted chapters and will not be visible to Student}
+
+- Exam/Exam: 
+* Can create a Exam(Each Course can have only one Exam)
+* Can view a Exam
+* Can Edit a Exam
+* Can Delete a Exam {Exam Deletion is also Soft Delete; It will be available in the deleted Exams and will not be visible to Student}
+
+- Can view Reviews given to his Own Course
+
+
+3) Admin: 
+- Login
+* There will be a Forgot Password Option; Which will allow us to change the password by sending a Request to Email(Dummy); Then it will ask us to type the Required OTP; Then we can change the password to the account
+
+- In Instructor's Profile, there should be a Drop Down Box next to it:
+It contains:
+* My Profile to view Student Current Data [Which Internally contains Edit Profile button to edit Instructor Data(Cannot Edit Email); Does not have password option]
+* Change Password [Current Password, New Password and New Password Confirmation and then click change password]
+* Logout
+
+- Can View Users: 
+* See All Users [View Activated and Deactivated Users]; Differentiate Student a
+* See Activated Users 
+* See Deactivated Users
+
+ - Can View Couses: 
+* See All Users [View Activated and Deactivated Users]
+* See Activated Users 
+* See Deactivated Users
