@@ -1,0 +1,13 @@
+    courseCart: {
+        type: [Types.ObjectId],
+        ref: "course",
+        default: [],
+        validate: {
+            validator: function (v) {
+                if (v.length === 0) 
+                    return true;
+                return this.role === "STUDENT";
+            },
+            message: "Only users with role STUDENT can have courseCart"
+        }
+    }

@@ -1,0 +1,30 @@
+//Write Article (protected route)
+authorApp.post("/articles",verifyToken("AUTHOR"),async(req,res)=>{
+    //get articleObj from client
+    const articleObj=req.body;
+
+    //req user
+    const user=req.user;
+
+    //check author
+    let author=await UserModel.findById(articleObj.author);
+
+    //check if the author exist
+    if(!author)
+    {
+        return res.status(404).json({message:"Invalid Author"})
+    }
+    //
+    if(author.email!=user.email)
+    {
+        return res.status(404).json({message:"You are not the authorized author"})
+    }
+    //create article document
+    const articleDoc=new ArticleModel(articleObj);
+
+    //save the article document
+    await articleDoc.save();
+
+    //send res to author
+    res.status(201).json({message:"Article Created Successfully"})
+})

@@ -1,0 +1,30 @@
+//Create Course 
+instructorApp.post("/course",verifyToken("INSTRUCTOR"),async(req,res)=>{
+    //get courseobj from client
+    const courseObj=req.body
+
+    //get user from token
+    let user=req.user
+
+    //check if instructor exists
+    let instructor=await UserModel.findById(courseObj.instructor)
+
+
+    if(!instructor)
+    {
+        return res.status(404).json({message:"Invalid Instructor! Instructor does not exist"})
+    }
+    
+    //if logged in instructor and instructor from course obj do no match
+    if(instructor.email!==user.email){
+        return res.status(403).json({message:"You are not the Authorized Instructor"})
+    }
+
+    //create course document
+    const newCourseDoc=new CourseModel(courseObj)
+
+    //save document into database
+    await newCourseDoc.save()
+    //res
+    res.status(201).json({message:"Course Created Successfully"})
+})

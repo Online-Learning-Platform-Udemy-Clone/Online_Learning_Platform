@@ -1,0 +1,27 @@
+//Update an Article
+authorApp.put("/article",verifyToken("AUTHOR"),async(req,res)=>{
+    /*get articleObj from req
+    const {articleId,...articleObj}=req.body;
+    const oriArticle=req.body;
+
+    //find article by Id and Update it
+    const updatedArticle=await ArticleModel.findByIdAndUpdate(articleObj.articleId,{articleObj},{new:true});
+    //send res
+    res.json({message:"Updated Success",payload:updatedArticle})*/
+
+    //get author if from decoded token
+    const authorIdOfToken=req.user?.id;
+    //get modified article from client
+    const {articleId,title,category,content}=req.body; //{articleId,tile,category,content}
+    //find article by id and update
+    const modifiedArticle= await ArticleModel.findOneAndUpdate(
+        {_id:articleId,author:authorIdOfToken},
+        {$set:{title,category,content}},
+        {new:true});
+    if(!modifiedArticle)
+    {
+        return res.status(403).json({message:"Not Authorized to edit article"})
+    }
+    //send res
+    res.status(200).json({message:"Article is updated",payload:modifiedArticle})
+})

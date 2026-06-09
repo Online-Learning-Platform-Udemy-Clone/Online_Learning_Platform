@@ -1,0 +1,18 @@
+Step 3: Commit and Push Your Files to GitHub
+1. Commit Your Changes
+After staging your files, commit them with a message:
+git commit -m "commit for "
+
+2. Link Your Local Repository to GitHub
+Go to the GitHub repository you created earlier. Copy the HTTPS or SSH URL of your repository from GitHub. It will look like:
+https://github.com/YourUsername/ATP_YourRoll-Number.git
+In your terminal, link your local repository to the remote GitHub repository using this command:
+
+git remote add origin https://github.com/YourUsername/ATP_YourRoll-Number.git
+
+3. Set Branch to Main (Recommended)
+Run: git branch -M main
+
+4. Push your Files to GitHub
+For the first push: git push -u origin main
+From next time onward, simply use: git push
